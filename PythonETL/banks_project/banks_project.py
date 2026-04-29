@@ -21,15 +21,13 @@ def log_progress(message):
 folder_path  = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project"
 log_file     = f"{folder_path}/code_log.txt"
 exchange_csv = f"{folder_path}/exchange_rate.csv"
-output_csv   = f"{folder_path}/banks_project_output.csv"
+output_csv   = f"{folder_path}/Largest_banks_data.csv"
 db_name      = f"{folder_path}/Banks.db"
 table_name   = "Largest_banks"
 wiki_url     = "https://en.wikipedia.org/wiki/List_of_largest_banks"
 headers      = {"User-Agent": "Mozilla/5.0"}
 
 log_progress("Preliminaries complete. Initiating ETL process...")
-
-
 
 
 
@@ -97,22 +95,25 @@ def transform(df, csv_path):
 # TASK 4: Load function to save the transformed DataFrame to a CSV file.
 def load_to_csv(df, output_path):
     '''Loads the transformed dataframe to a CSV file.'''
+    log_progress("Loading to CSV started...")
     df.to_csv(output_path, index=False)
-    log_progress("Data saved to CSV file")
+    log_progress("Data saved to CSV file.")
 
 
 
 # TASK 5: Load function to save the transformed DataFrame to a SQLite database.
 def load_to_db(df, conn, table_name):
     '''Loads the transformed dataframe into a SQLite database table.'''
+    log_progress("Loading to Database started...")
     df.to_sql(table_name, conn, if_exists="replace", index=False)
-    log_progress("Data loaded to Database as a table, Executing queries")
+    log_progress("Data loaded to Database as a table.")
 
 
 
 # TASK 6: Run SQL queries to validate the data in the database.
 def run_queries(query, conn):
     '''Executes a SQL query and prints the statement and results.'''
+    log_progress("Running SQL query...")
     cursor = conn.cursor()
     cursor.execute(query)
     results = cursor.fetchall()
@@ -122,7 +123,7 @@ def run_queries(query, conn):
     for row in results:
         print(row)
 
-    log_progress("Process Complete")
+    log_progress("Process Complete.")
     return results
 
 
@@ -132,8 +133,9 @@ load_to_csv(df=transformed_df, output_path=output_csv)
 
 
 # Initiate SQLite connection
+log_progress("Initiating SQL Connection...")
 db_conn = sqlite3.connect(database=db_name)
-log_progress("SQL Connection initiated")
+log_progress("SQL Connection established.")
 
 # Load dataframe into DB
 load_to_db(df=transformed_df, conn=db_conn, table_name=table_name)
@@ -151,4 +153,4 @@ run_queries("SELECT Name FROM Largest_banks LIMIT 5", conn=db_conn)
 
 # Close connection when done
 db_conn.close()
-log_progress("Server Connection closed")
+log_progress("Server Connection closed.")
