@@ -3,14 +3,11 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import sqlite3
 from io import StringIO
 
 
 # TASK 1: Defining log function at the top to ensure it's available for all subsequent code
-log_file     = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/code_log.txt"
-exchange_csv = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/exchange_rate.csv"
-output_csv   = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/banks_project_output.csv"
-
 def log_progress(message):
     '''Logs the progress of the ETL code execution to a text file.'''
     timestamp_format = '%Y-%b-%d-%H:%M:%S'  # Year-Month-Day-Hour-Minute-Second
@@ -19,8 +16,16 @@ def log_progress(message):
     with open(log_file, "a") as f:
         f.write(timestamp + " : " + message + "\n")
 
-wiki_url = "https://en.wikipedia.org/wiki/List_of_largest_banks"
-headers = {"User-Agent": "Mozilla/5.0"}
+
+
+folder_path  = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project"
+log_file     = f"{folder_path}/code_log.txt"
+exchange_csv = f"{folder_path}/exchange_rate.csv"
+output_csv   = f"{folder_path}/banks_project_output.csv"
+db_name      = f"{folder_path}/Banks.db"
+table_name   = "Largest_banks"
+wiki_url     = "https://en.wikipedia.org/wiki/List_of_largest_banks"
+headers      = {"User-Agent": "Mozilla/5.0"}
 
 log_progress("Preliminaries complete. Initiating ETL process...")
 
@@ -43,7 +48,7 @@ def extract(url=wiki_url):
     df.columns = [' '.join([str(c) for c in col if c]) if isinstance(col, tuple) else str(col) for col in df.columns]
     df.columns = [c.strip() for c in df.columns]
 
-    print("Extracted columns:", df.columns.tolist())  # Debug
+    # print("Extracted columns:", df.columns.tolist())  # Debug
 
     # Dynamically detect columns
     name_col = [c for c in df.columns if "Bank" in c or "Name" in c][0]
@@ -97,20 +102,53 @@ def load_to_csv(df, output_path):
 
 
 
+# TASK 5: Load function to save the transformed DataFrame to a SQLite database.
+def load_to_db(df, conn, table_name):
+    '''Loads the transformed dataframe into a SQLite database table.'''
+    df.to_sql(table_name, conn, if_exists="replace", index=False)
+    log_progress("Data loaded to Database as a table, Executing queries")
+
+
+
+# TASK 6: Run SQL queries to validate the data in the database.
+def run_queries(query, conn):
+    '''Executes a SQL query and prints the statement and results.'''
+    cursor = conn.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    print("\nQuery:", query)
+    print("Output:")
+    for row in results:
+        print(row)
+
+    log_progress("Process Complete")
+    return results
+
+
 extracted_df = extract(url=wiki_url)
 transformed_df = transform(df=extracted_df, csv_path=exchange_csv)
 load_to_csv(df=transformed_df, output_path=output_csv)
-#market_cap_5th_largest_eur = transformed_df.loc[4, "MC_EUR_Billion"]
 
-#print(transformed_df)
-#print(market_cap_5th_largest_eur)
 
-# print(wiki_res.__class__)
-# print(wiki_res.status_code)
+# Initiate SQLite connection
+db_conn = sqlite3.connect(database=db_name)
+log_progress("SQL Connection initiated")
 
-# If successful, parse the HTML
-# if wiki_res.status_code == 200:
-#    soup = BeautifulSoup(wiki_res.text, "html.parser")
-#    tables = soup.find_all("table", {"class": "wikitable"})
-#    print(tables[0].prettify()[:500])  # Print the first 500 characters of the first table
-#    print(f"Found {len(tables)} tables")
+# Load dataframe into DB
+load_to_db(df=transformed_df, conn=db_conn, table_name=table_name)
+
+
+# 1. Print the contents of the entire table
+run_queries("SELECT * FROM Largest_banks", conn=db_conn)
+
+# 2. Print the average market capitalization of all the banks in Billion GBP
+run_queries("SELECT AVG(MC_GBP_Billion) FROM Largest_banks", conn=db_conn)
+
+# 3. Print only the names of the top 5 banks
+run_queries("SELECT Name FROM Largest_banks LIMIT 5", conn=db_conn)
+
+
+# Close connection when done
+db_conn.close()
+log_progress("Server Connection closed")
