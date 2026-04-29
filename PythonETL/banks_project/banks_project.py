@@ -112,19 +112,22 @@ def load_to_db(df, conn, table_name):
 
 # TASK 6: Run SQL queries to validate the data in the database.
 def run_queries(query, conn):
-    '''Executes a SQL query and prints the statement and results.'''
-    log_progress("Running SQL query...")
+    '''Executes a SQL query, prints the statement and results as a DataFrame, and logs progress.'''
     cursor = conn.cursor()
     cursor.execute(query)
     results = cursor.fetchall()
 
+    # Convert results into a DataFrame for readability
+    df_results = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
+
     print("\nQuery:", query)
     print("Output:")
-    for row in results:
-        print(row)
+    print(df_results)
 
-    log_progress("Process Complete.")
-    return results
+    # Log the executed query
+    log_progress(f"Executed query: {query}")
+
+    return df_results
 
 
 extracted_df = extract(url=wiki_url)
@@ -145,7 +148,7 @@ load_to_db(df=transformed_df, conn=db_conn, table_name=table_name)
 run_queries("SELECT * FROM Largest_banks", conn=db_conn)
 
 # 2. Print the average market capitalization of all the banks in Billion GBP
-run_queries("SELECT AVG(MC_GBP_Billion) FROM Largest_banks", conn=db_conn)
+run_queries("SELECT AVG(MC_GBP_Billion) AS Average_Market_Capitalization_GBP FROM Largest_banks", conn=db_conn)
 
 # 3. Print only the names of the top 5 banks
 run_queries("SELECT Name FROM Largest_banks LIMIT 5", conn=db_conn)
