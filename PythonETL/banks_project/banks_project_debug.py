@@ -55,7 +55,7 @@ def extract(url=wiki_url):
 
     return df.head(10)
 
-print(extract())
+print(extract(url=wiki_url))
 
 
 def transform(df, exchange_csv):

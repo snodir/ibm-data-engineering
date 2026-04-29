@@ -1,5 +1,15 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import numpy as np
+from datetime import datetime
+from io import StringIO
+
+
 # TASK 1: Defining log function at the top to ensure it's available for all subsequent code
-log_file = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/code_log.txt"
+log_file     = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/code_log.txt"
+exchange_csv = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/exchange_rate.csv"
+output_csv   = "C:/Users/user/ProgrammingProjects/Coursera/IBM_DE/ibm-data-engineering/PythonETL/banks_project/banks_project_output.csv"
 
 def log_progress(message):
     '''Logs the progress of the ETL code execution to a text file.'''
@@ -8,15 +18,6 @@ def log_progress(message):
     timestamp = now.strftime(timestamp_format)
     with open(log_file, "a") as f:
         f.write(timestamp + " : " + message + "\n")
-
-
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-import numpy as np
-from datetime import datetime
-from io import StringIO
-
 
 wiki_url = "https://en.wikipedia.org/wiki/List_of_largest_banks"
 headers = {"User-Agent": "Mozilla/5.0"}
@@ -59,7 +60,50 @@ def extract(url=wiki_url):
 
     return df.head(10)
 
-print(extract())
+# print(extract(url=wiki_url))
+
+
+
+
+# TASK 3: Transform function to convert market capitalization from USD to GBP and EUR using exchange rates from a CSV file.
+def transform(df, csv_path):
+    '''Transforms the dataframe by adding GBP, EUR, INR columns.'''
+    # Read exchange rates into a dictionary
+    log_progress("Data transformation started...")
+    rates = pd.read_csv(csv_path)
+    exchange_rate = rates.set_index("Currency").to_dict()["Rate"]
+
+    # Ensure values are floats
+    gbp_rate = float(exchange_rate["GBP"])
+    eur_rate = float(exchange_rate["EUR"])
+    inr_rate = float(exchange_rate["INR"])
+
+    # Add new columns, rounded to 2 decimals
+    df["MC_GBP_Billion"] = [np.round(x * gbp_rate, 2) for x in df["MC_USD_Billion"]]
+    df["MC_EUR_Billion"] = [np.round(x * eur_rate, 2) for x in df["MC_USD_Billion"]]
+    df["MC_INR_Billion"] = [np.round(x * inr_rate, 2) for x in df["MC_USD_Billion"]]
+
+    # Log entry
+    log_progress("Data transformation complete.")
+
+    return df
+
+
+# TASK 4: Load function to save the transformed DataFrame to a CSV file.
+def load_to_csv(df, output_path):
+    '''Loads the transformed dataframe to a CSV file.'''
+    df.to_csv(output_path, index=False)
+    log_progress("Data saved to CSV file")
+
+
+
+extracted_df = extract(url=wiki_url)
+transformed_df = transform(df=extracted_df, csv_path=exchange_csv)
+load_to_csv(df=transformed_df, output_path=output_csv)
+#market_cap_5th_largest_eur = transformed_df.loc[4, "MC_EUR_Billion"]
+
+#print(transformed_df)
+#print(market_cap_5th_largest_eur)
 
 # print(wiki_res.__class__)
 # print(wiki_res.status_code)
