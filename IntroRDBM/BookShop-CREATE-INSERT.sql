@@ -34,7 +34,7 @@ VALUES
 
 -- SELECT * FROM dbo.BookShop;
 
-CREATE TABLE BookShop_AuthorDetails
+CREATE TABLE dbo.BookShop_AuthorDetails
 (
 	AUTHOR_ID INTEGER NOT NULL,
 	AUTHOR_NAME VARCHAR(30) NOT NULL,
