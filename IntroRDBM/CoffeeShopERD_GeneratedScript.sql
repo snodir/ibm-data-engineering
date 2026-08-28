@@ -73,6 +73,16 @@ CREATE TABLE IF NOT EXISTS public.product
     PRIMARY KEY (product_id)
 );
 
+CREATE TABLE public.product_task (
+    product_id     SERIAL PRIMARY KEY,       -- Unique identifier for each product
+    category       VARCHAR(100) NOT NULL,    -- Broad grouping (e.g., Electronics, Clothing)
+    type           VARCHAR(100) NOT NULL,    -- Subcategory or type within category
+    product_name   VARCHAR(150) NOT NULL,    -- Actual product name
+    description    TEXT,                     -- Longer descriptive text
+    price          DECIMAL(10,2) NOT NULL    -- Unit price with 2 decimal places
+);
+
+
 CREATE TABLE IF NOT EXISTS public.product_type
 (
     product_type_id integer,
@@ -91,6 +101,19 @@ CREATE TABLE IF NOT EXISTS public.sales_transaction
     customer_id integer,
     PRIMARY KEY (transaction_id)
 );
+
+CREATE TABLE public.sales_transaction_task (
+    transaction_id     SERIAL PRIMARY KEY,       -- Auto-incrementing unique identifier
+    transaction_date   DATE NOT NULL,            -- Date of the transaction
+    transaction_time   TIME NOT NULL,            -- Time of the transaction
+    sales_outlet_id    INT NOT NULL,             -- FK to SalesOutlet table
+    staff_id           INT NOT NULL,             -- FK to Staff table
+    customer_id        INT NOT NULL,             -- FK to Customer table
+    product_id         INT NOT NULL,             -- FK to Product table
+    quantity           INT NOT NULL,             -- Number of items sold
+    price              NUMERIC(10,2) NOT NULL    -- Unit price at time of sale
+);
+
 
 ALTER TABLE IF EXISTS public.sales_transaction
     ADD FOREIGN KEY (staff_id)

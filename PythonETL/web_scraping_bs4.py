@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-page = requests.get("http://EnterWebsiteURL ... ).text
+page = requests.get("http://EnterWebsiteURL ... ").text
 
 #Creates a BeautifulSoup object
 soup = BeautifulSoup(page, "html.parser")
@@ -11,7 +11,7 @@ artists = soup.find_all('a')
 
 #Clears data of all tags
 for artist in artists:
-names = artist.contents[0]
-fullLink = artist.get('href')
-print(names)
-print(fullLink)
+    names = artist.contents[0]
+    fullLink = artist.get('href')
+    print(names)
+    print(fullLink)
