@@ -1,0 +1,5 @@
+venv312_ibmde/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+logs/
