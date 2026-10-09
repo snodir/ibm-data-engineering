@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 logs/
+
+# Spark / Derby local metastore artifacts
+derby.log
+metastore_db/
+spark-warehouse/
