@@ -13,9 +13,11 @@ cffi==2.1.1
 charset-normalizer==3.5.2
 colorama==0.4.6
 comm==0.2.3
+connectorx==0.4.6
 debugpy==1.8.22
 defusedxml==0.7.1
 delta_spark==4.4.1
+duckdb==2.0.0
 executing==2.2.1
 fastjsonschema==2.22.2
 findspark==2.0.1
@@ -73,10 +75,14 @@ prettytable==3.18.0
 prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 psutil==7.2.2
+psycopg==3.3.6
+psycopg-binary==3.3.6
 pure_eval==0.2.4
 py4j==0.10.9.9
+pyarrow==26.0.0
 pycparser==3.1
 Pygments==2.21.0
+pyodbc==5.3.0
 pyspark==4.2.0
 python-dateutil==2.9.0.post0
 python-json-logger==4.2.0
